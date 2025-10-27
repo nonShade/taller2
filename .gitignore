@@ -1,2 +1,4 @@
+.venv/
 .env
-.venv
+data/cropped/me/
+data/me/

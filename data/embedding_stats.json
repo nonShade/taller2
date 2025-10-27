@@ -1,0 +1,7 @@
+{
+  "total_samples": 1044,
+  "embedding_dimension": 512,
+  "positive_samples": 545,
+  "negative_samples": 499,
+  "class_balance": 0.5220306513409961
+}
