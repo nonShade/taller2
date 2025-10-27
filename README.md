@@ -181,4 +181,3 @@ python -m pytest tests/test_api.py -v
 
 - **Datos personales**: Solo usar fotos propias para el conjunto "YO"
 - **Almacenamiento**: Los modelos no almacenan imágenes originales
-- **Uso responsable**: Este proyecto es únicamente educativo
