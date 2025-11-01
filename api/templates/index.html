@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador Facial - Me Verifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 15px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e8f0ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .preview-container {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .result-failure {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .result-info {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .result-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .result-detail {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-detail strong {
+            display: block;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #c62828;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Me Verifier</h1>
+            <p>Sube una foto para verificar si eres tú</p>
+        </div>
+
+        <form id="upload-form" enctype="multipart/form-data">
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">
+                    <strong>Haz clic aquí o arrastra una foto</strong><br>
+                    <small>Formatos: JPG, JPEG, PNG (máx. 16MB)</small>
+                </div>
+                <input type="file" id="file-input" name="image" accept="image/*" required>
+            </div>
+        </form>
+
+        <div class="preview-container" id="preview-container">
+            <img id="preview-image" class="preview-image" alt="Vista previa">
+            <div style="margin-top: 15px;">
+                <button type="button" class="btn" id="verify-btn">🚀 Verificar Identidad</button>
+                <button type="button" class="btn" id="cancel-btn">❌ Cancelar</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Analizando imagen...</p>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+
+        <div class="result-container" id="result-container">
+            <div class="result-title" id="result-title"></div>
+            <div class="result-details" id="result-details"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const verifyBtn = document.getElementById('verify-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const resultContainer = document.getElementById('result-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDetails = document.getElementById('result-details');
+
+        let selectedFile = null;
+
+        // Eventos de drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // Click en área de upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Selección de archivo
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // Manejar selección de archivo
+        function handleFileSelect(file) {
+            if (!isValidFile(file)) {
+                showError('Archivo no válido. Use JPG, JPEG o PNG (máx. 16MB)');
+                return;
+            }
+
+            selectedFile = file;
+            showPreview(file);
+            hideError();
+            hideResult();
+        }
+
+        // Validar archivo
+        function isValidFile(file) {
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            const maxSize = 16 * 1024 * 1024; // 16MB
+
+            return validTypes.includes(file.type) && file.size <= maxSize;
+        }
+
+        // Mostrar vista previa
+        function showPreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                uploadArea.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Botón verificar
+        verifyBtn.addEventListener('click', () => {
+            if (selectedFile) {
+                verifyImage(selectedFile);
+            }
+        });
+
+        // Botón cancelar
+        cancelBtn.addEventListener('click', () => {
+            resetForm();
+        });
+
+        // Verificar imagen
+        async function verifyImage(file) {
+            showLoading();
+            hideError();
+            hideResult();
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(data);
+                } else {
+                    showError(data.error || 'Error procesando la imagen');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar resultado
+        function showResult(data) {
+            const isMe = data.is_me;
+            const score = data.score;
+            const threshold = data.threshold;
+            const timing = data.timing_ms;
+
+            resultContainer.className = `result-container ${isMe ? 'result-success' : 'result-failure'}`;
+            
+            if (isMe) {
+                resultTitle.innerHTML = '✅ ¡Es tu rostro!';
+            } else {
+                resultTitle.innerHTML = '❌ No es tu rostro';
+            }
+
+            resultDetails.innerHTML = `
+                <div class="result-detail">
+                    <strong>Puntuación</strong>
+                    ${(score * 100).toFixed(1)}%
+                </div>
+                <div class="result-detail">
+                    <strong>Umbral</strong>
+                    ${(threshold * 100).toFixed(1)}%
+                </div>
+                <div class="result-detail">
+                    <strong>Tiempo</strong>
+                    ${timing}ms
+                </div>
+                <div class="result-detail">
+                    <strong>Modelo</strong>
+                    ${data.model_version}
+                </div>
+            `;
+
+            resultContainer.style.display = 'block';
+        }
+
+        // Mostrar/ocultar elementos
+        function showLoading() {
+            loading.style.display = 'block';
+            verifyBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            verifyBtn.disabled = false;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function hideResult() {
+            resultContainer.style.display = 'none';
+        }
+
+        function resetForm() {
+            selectedFile = null;
+            previewContainer.style.display = 'none';
+            uploadArea.style.display = 'block';
+            fileInput.value = '';
+            hideError();
+            hideResult();
+            hideLoading();
+        }
+    </script>
+</body>
+</html>

@@ -11,7 +11,7 @@ from io import BytesIO
 from datetime import datetime
 from werkzeug.exceptions import RequestEntityTooLarge
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from facenet_pytorch import MTCNN, InceptionResnetV1
 
 # Añadir el directorio padre al path para importar utils
@@ -201,6 +201,7 @@ class MeVerifierAPI:
 
     def setup_routes(self):
         """Configura rutas de la API"""
+        self.app.route('/', methods=['GET'])(self.index)
         self.app.route('/healthz', methods=['GET'])(self.health_check)
         self.app.route('/verify', methods=['POST'])(self.verify)
         self.app.config['MAX_CONTENT_LENGTH'] = self.config.MAX_FILE_SIZE_MB * 1024 * 1024
@@ -222,6 +223,10 @@ class MeVerifierAPI:
         except Exception as e:
             logging.error(f"Error en health check: {e}")
             return jsonify({"error": "Error interno del servidor"}), 500
+
+    def index(self):
+        """Página principal con interfaz de upload"""
+        return render_template('index.html')
 
     def verify(self):
         """Endpoint de verificación con modelo REAL"""
