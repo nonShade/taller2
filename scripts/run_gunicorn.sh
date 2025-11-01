@@ -35,4 +35,4 @@ exec gunicorn \
     --preload \
     --max-requests 1000 \
     --max-requests-jitter 100 \
-    api.app:api.app
+    api.app:application

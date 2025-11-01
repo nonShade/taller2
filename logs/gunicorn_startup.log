@@ -1,0 +1,5 @@
+Iniciando servidor con gunicorn...
+Host: 0.0.0.0
+Puerto: 5000
+Workers: 2
+Timeout: 120

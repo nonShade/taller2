@@ -267,6 +267,9 @@ class MeVerifierAPI:
         self.app.run(host=host, port=port, debug=debug)
 
 
+# Para gunicorn - variable de aplicación WSGI
+api = MeVerifierAPI()
+application = api.app
+
 if __name__ == '__main__':
-    api = MeVerifierAPI()
     api.run()
