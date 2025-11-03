@@ -114,7 +114,7 @@ curl -F "image=@path/to/image.jpg" http://localhost:5000/verify
 
 ## 📊 Pipeline de Datos
 
-1. **Recolección**: 40-50 fotos propias + 200-400 fotos de otras personas
+1. **Recolección**: 500 fotos propias + 500 fotos de otras personas
 2. **Preprocesamiento**: Detección facial con MTCNN, recorte a 160×160px
 3. **Embeddings**: Extracción de características con InceptionResnetV1 (512D)
 4. **Entrenamiento**: Logistic Regression en embeddings
